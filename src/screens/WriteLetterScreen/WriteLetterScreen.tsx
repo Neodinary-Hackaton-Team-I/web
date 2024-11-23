@@ -1,7 +1,7 @@
 import React from 'react';
 import { Pressable, SafeAreaView, Text, View, Image, TouchableWithoutFeedback } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import CheckedSvg from '@assets/WriteLetterScreen/checkedBox.svg';
 import UnCkeckedSvg from '@assets/WriteLetterScreen/unCheckedBox.svg';
 import BackArrowSvg from '@assets/WriteLetterScreen/backArrow.svg';
@@ -11,39 +11,78 @@ import { WriteLetterScreenProps } from 'src/shared/stack/stack';
 import Header from '@widgets/Header';
 import useDebounce from 'src/shared/hooks/useDebounce';
 import Modal from '@widgets/modal';
+import { axiosInstance } from '@axios/axios.Instance';
+import { useRecoilValue } from 'recoil';
+import { profileStore } from '@recoil/store';
+import axios from 'axios';
 
 const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
+  const senderId = useRecoilValue(profileStore);
   const [isCheckedBox, setIsCheckedBox] = useState<boolean>(false);
   const [receiver, setReciever] = useState<string>('');
   const [letterValue, setLetterValue] = useState<string>('');
-  const [imageValue, setImageValue] = useState(undefined);
+  // image
+  const [formData, setFormData] = useState();
+  const [s3Url, setS3Url] = useState(undefined);
   const [imageUri, setImageUri] = useState<string>();
   const [isOverlay, setIsOverlay] = useState(false);
   // 검색 api 이용할 때,
   const debouncedValue = useDebounce(receiver, 400);
   const isValid = receiver.length !== 0 && letterValue.length !== 0 && imageUri !== undefined;
 
-  const onSelectImage = () => {
-    launchImageLibrary({ mediaType: 'photo', maxWidth: 108, maxHeight: 108 }, (res) => {
+  const onSelectImage = async () => {
+    launchImageLibrary({ mediaType: 'photo', maxWidth: 108, maxHeight: 108 }, async (res) => {
       if (res.didCancel || !res.assets) {
         return;
       }
       if (res.errorCode) {
         console.log(res.errorCode);
       }
-
-      const formData = new FormData();
-
       const image = res.assets[0];
-      const { uri, type, fileName } = image;
-      const file = { uri: uri, type: type, fileName: fileName };
+      const reader = new FileReader();
+
+      const { uri, type } = image;
       setImageUri(uri);
-      formData.append('file', file);
+
+      const preSignedUrlRes = await axiosInstance.get('/api/v1/files/presigned-url');
+      const preSignedUrl = preSignedUrlRes?.data?.data?.url.replace(/export/g, '');
+
+      if (preSignedUrlRes.data.status !== 200) return;
+      const response = await fetch(uri);
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', uri);
+        xhr.responseType = 'blob'; // Blob으로 응답 설정
+        xhr.onload = () => {
+          if (xhr.status === 200) {
+            resolve(xhr.response); // 성공적으로 Blob 생성
+          } else {
+            reject(new Error(`Failed to fetch Blob. Status: ${xhr.status}`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('Failed to fetch Blob.'));
+        xhr.send();
+      });
+
+      const putRes = await axios.put(preSignedUrl, blob, {
+        headers: {
+          'Content-Type': type,
+        },
+      });
+      setS3Url(preSignedUrl.split('?')[0]);
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // receiver , letterValue,imageValue (FormData) 전송
+    const res = await axiosInstance.post('/api/v1/letters', {
+      imageUrl:
+        'https://umcmc-s3-bucket.s3.ap-northeast-2.amazonaws.com/uploads/images/df6b625f-505b-4da1-8f78-8517da43a694',
+      body: letterValue,
+      senderId: senderId.userId,
+      receiverId: 3,
+    });
+    console.log(res);
     navigation.navigate('WriteLetterCompleteScreen', { receiver: receiver });
   };
 
