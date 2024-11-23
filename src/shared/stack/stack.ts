@@ -21,7 +21,7 @@ export type StackParamList = {
   // 편지 작성 완료 스크린
   WriteLetterCompleteScreen: { receiver: string };
   // 편지 조회 스크린
-  ViewLetterScreen: undefined;
+  ViewLetterScreen: { letterId: number };
 };
 
 export type LoginScreenProps = NativeStackScreenProps<StackParamList, 'LoginScreen'>;

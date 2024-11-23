@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Pressable, SafeAreaView, Text, View, Image, TouchableWithoutFeedback } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { useState } from 'react';
@@ -9,19 +9,31 @@ import DefaultImageSvg from '@assets/WriteLetterScreen/defaultImage.svg';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { WriteLetterScreenProps } from 'src/shared/stack/stack';
 import Header from '@widgets/Header';
-import useDebounce from 'src/shared/hooks/useDebounce';
 import Modal from '@widgets/modal';
+import { getFollowingList } from '@app/server/writeLetter/writeLetter';
+import { useRecoilValue } from 'recoil';
+import { profileStore } from '@recoil/store';
+
+interface UserItem {
+  nickName: string;
+  userId: number;
+}
 
 const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
+  const profile = useRecoilValue(profileStore);
+
   const [isCheckedBox, setIsCheckedBox] = useState<boolean>(false);
-  const [receiver, setReciever] = useState<string>('');
+  const [receiverList, setReceiverList] = useState<UserItem[]>([]);
+  const [receiverId, setRecieverId] = useState<number>(0);
+  const [receiverNickname, setRecieverNickname] = useState<string>('');
   const [letterValue, setLetterValue] = useState<string>('');
   const [imageValue, setImageValue] = useState(undefined);
   const [imageUri, setImageUri] = useState<string>();
   const [isOverlay, setIsOverlay] = useState(false);
+
   // 검색 api 이용할 때,
-  const debouncedValue = useDebounce(receiver, 400);
-  const isValid = receiver.length !== 0 && letterValue.length !== 0 && imageUri !== undefined;
+  // const debouncedValue = useDebounce(receiverNickname, 400);
+  const isValid = receiverId !== 0 && letterValue.length !== 0 && imageUri !== undefined;
 
   const onSelectImage = () => {
     launchImageLibrary({ mediaType: 'photo', maxWidth: 108, maxHeight: 108 }, (res) => {
@@ -44,16 +56,26 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
 
   const handleSubmit = () => {
     // receiver , letterValue,imageValue (FormData) 전송
-    navigation.navigate('WriteLetterCompleteScreen', { receiver: receiver });
+    navigation.navigate('WriteLetterCompleteScreen', { receiver: receiverNickname });
   };
 
   const handleLetterValue = (text: string) => {
-    setReciever(text);
+    setRecieverNickname(text);
   };
 
   const handleTouch = () => {
     setIsOverlay(false);
   };
+
+  const getUserList = async () => {
+    const response = await getFollowingList(profile.userId, '2024-11-24T23:59:59', 100);
+
+    setReceiverList(response.data.follows);
+  };
+
+  useEffect(() => {
+    getUserList();
+  }, []);
 
   return (
     <SafeAreaView>
@@ -77,7 +99,7 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
                 onPress={() => {
                   const nextCheckedState = !isCheckedBox; // 현재 상태를 반전
                   setIsCheckedBox(nextCheckedState); // 상태 업데이트
-                  setReciever(nextCheckedState ? '나에게' : ''); // 반전된 상태에 따라 수신자 업데이트
+                  setRecieverNickname(nextCheckedState ? '나에게' : ''); // 반전된 상태에 따라 수신자 업데이트
                 }}
               >
                 {isCheckedBox ? <CheckedSvg /> : <UnCkeckedSvg />}
@@ -89,9 +111,13 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
               <Text className="absolute left-0 bottom-[20px]">To .</Text>
               <TextInput
                 className={`w-full h-14 border-b ${
-                  receiver.length === 0 ? 'border-red200' : 'border-gray03'
+                  receiverNickname !== undefined &&
+                  receiverNickname !== '' &&
+                  receiverNickname.length === 0
+                    ? 'border-red200'
+                    : 'border-gray03'
                 } pl-8`}
-                value={receiver}
+                value={receiverNickname}
                 onTouchStart={() => setIsOverlay(true)}
                 onChangeText={(text: string) => handleLetterValue(text)}
                 placeholder="수신자 입력"
@@ -99,10 +125,11 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
               {isOverlay && (
                 <Modal.Container>
                   <Modal.Item
-                    input={receiver}
-                    value={'요리왕'}
-                    onPress={() => {
-                      setReciever('요리왕');
+                    input={receiverNickname}
+                    userList={receiverList}
+                    onPress={(user: UserItem) => {
+                      setRecieverId(user.userId);
+                      setRecieverNickname(user.nickName);
                       setIsOverlay(false);
                     }}
                   />

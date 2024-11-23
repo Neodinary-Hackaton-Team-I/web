@@ -6,21 +6,31 @@ import NextButton from '@assets/home/nextButton.svg';
 
 import OpenedLetter from '@assets/home/openedLetter.svg';
 import NotOpenedLetter from '@assets/home/notOpenedLetter.svg';
+import { HomeScreenProps } from 'src/shared/stack/stack';
 
 interface Letter {
   letterId: number;
-  date: string;
-  writer: string;
-  isOpened: boolean;
+  senderId: number;
+  receiverId: number;
+  imageUrl: string;
+  body: string;
+  createdAt: string;
+  nickname: string;
+  opened: boolean;
 }
 
 interface LetterComponentProps {
+  navigation: HomeScreenProps['navigation'];
   letterList: {
     [key: string]: Letter[];
   };
 }
 
-const LetterComponent: React.FC<LetterComponentProps> = ({ letterList }) => {
+const LetterComponent: React.FC<LetterComponentProps> = ({ navigation, letterList }) => {
+  const toLetterDetail = (letterId: number) => {
+    navigation.navigate('ViewLetterScreen', { letterId: letterId });
+  };
+
   const [visibleLetterIndex, setVisibleLetterIndex] = useState<{
     [key: string]: number;
   }>({});
@@ -73,28 +83,34 @@ const LetterComponent: React.FC<LetterComponentProps> = ({ letterList }) => {
                 </Pressable>
               )}
 
-              {currentLetter.isOpened ? (
-                <View className="relative">
+              {currentLetter.opened ? (
+                <Pressable
+                  onPress={() => toLetterDetail(currentLetter.letterId)}
+                  className="relative"
+                >
                   <OpenedLetter />
                   <View className="absolute top-4 left-12 space-y-8">
                     <Image source={require('../../shared/assets/home/gift4.png')} />
                     <Text className="text-center text-[#282525] text-sm font-semibold">
                       From{'\n'}
-                      <Text className="text-[#5D5656] text-[10px]">{currentLetter.writer}</Text>
+                      <Text className="text-[#5D5656] text-[10px]">{currentLetter.nickname}</Text>
                     </Text>
                   </View>
-                </View>
+                </Pressable>
               ) : (
-                <View className="relative">
+                <Pressable
+                  onPress={() => toLetterDetail(currentLetter.letterId)}
+                  className="relative"
+                >
                   <NotOpenedLetter />
                   <View className="absolute top-4 left-12 space-y-8">
                     <Image source={require('../../shared/assets/home/gift4.png')} />
                     <Text className="text-center text-[#282525] text-sm font-semibold">
                       From{'\n'}
-                      <Text className="text-[#5D5656] text-[10px]">{currentLetter.writer}</Text>
+                      <Text className="text-[#5D5656] text-[10px]">{currentLetter.nickname}</Text>
                     </Text>
                   </View>
-                </View>
+                </Pressable>
               )}
 
               {currentIndex < letters.length - 1 && (
