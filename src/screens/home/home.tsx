@@ -6,6 +6,8 @@ import LetterComponent from '@widgets/home/letterComponent';
 import WriteButton from '@assets/home/write.svg';
 import { HomeScreenProps } from 'src/shared/stack/stack';
 import Header from '@widgets/Header';
+import { useRecoilValue } from 'recoil';
+import { profileStore } from '@recoil/store';
 
 const dummyData = {
   '2024-11-01': [
@@ -61,9 +63,13 @@ const dummyData = {
 };
 
 const HomeScreen = ({ navigation }: HomeScreenProps) => {
+  const profile = useRecoilValue(profileStore);
+
   const toWrite = () => {
     navigation.navigate('WriteLetterScreen');
   };
+
+  console.log(profile);
 
   return (
     <SafeAreaView className="bg-white">

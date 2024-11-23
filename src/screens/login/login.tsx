@@ -45,6 +45,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
         email: email,
         password: password,
       });
+      console.log(response);
 
       setProfile({
         userId: response.data.userId,
