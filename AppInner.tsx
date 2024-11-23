@@ -29,10 +29,7 @@ function AppInner() {
         <stack.Navigator screenOptions={{ headerShown: false }}>
           <stack.Screen name="HomeScreen" component={HomeScreen} />
           <stack.Screen name="WriteLetterScreen" component={WriteLetterScreen} />
-          <stack.Screen
-            name="WriteLetterCompleteScreen"
-            component={WriteLetterCompleteScreen}
-          />
+          <stack.Screen name="WriteLetterCompleteScreen" component={WriteLetterCompleteScreen} />
           <stack.Screen name="UserSearchScreen" component={UserSearchScreen} />
           <stack.Screen name="FollowScreen" component={FollowScreen} />
         </stack.Navigator>
