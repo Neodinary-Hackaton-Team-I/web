@@ -23,6 +23,9 @@ module.exports = {
         background: 'linear-gradient(180deg, #000000 0%, #381438 100%)',
         loginBackground: "url('/src/shared/assets/login/background.svg')",
       },
+      dropShadow: {
+        button: '0px 4px 4px rgba(0, 0, 0, 0.25)', // remove the 'filter:'
+      },
     },
   },
   plugins: [],
