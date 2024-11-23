@@ -8,8 +8,8 @@ import BackArrowSvg from '@assets/WriteLetterScreen/backArrow.svg';
 import DefaultImageSvg from '@assets/WriteLetterScreen/defaultImage.svg';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { WriteLetterScreenProps } from 'src/shared/stack/stack';
-// Header
 import Header from '@widgets/Header';
+import useDebounce from 'src/shared/hooks/useDebounce';
 
 const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
   const [isCheckedBox, setIsCheckedBox] = useState<boolean>(false);
@@ -17,7 +17,8 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
   const [letterValue, setLetterValue] = useState<string>('');
   const [imageValue, setImageValue] = useState(undefined);
   const [imageUri, setImageUri] = useState<string>();
-
+  // 검색 api 이용할 때,
+  const debouncedValue = useDebounce(receiver, 400);
   const isValid = receiver.length !== 0 && letterValue.length !== 0 && imageUri !== undefined;
 
   const onSelectImage = () => {
@@ -40,6 +41,10 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
     navigation.navigate('WriteLetterCompleteScreen', { receiver: receiver });
   };
 
+  const handleLetterValue = (text: string) => {
+    setReciever(text);
+  };
+
   return (
     <SafeAreaView>
       <Header
@@ -56,7 +61,14 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
           </View>
           {/* 나에게 작성하기 */}
           <View className="w-full h-[24px] flex flex-row mt-[28px] mb-[10px] items-center">
-            <Pressable className="w-[24px]" onPress={() => setIsCheckedBox((prev) => !prev)}>
+            <Pressable
+              className="w-[24px]"
+              onPress={() => {
+                const nextCheckedState = !isCheckedBox; // 현재 상태를 반전
+                setIsCheckedBox(nextCheckedState); // 상태 업데이트
+                setReciever(nextCheckedState ? '나에게' : ''); // 반전된 상태에 따라 수신자 업데이트
+              }}
+            >
               {isCheckedBox ? <CheckedSvg /> : <UnCkeckedSvg />}
             </Pressable>
             <Text className="text-gray01">나에게 작성하기</Text>
@@ -68,7 +80,8 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
               className={`w-full h-14 border-b ${
                 receiver.length === 0 ? 'border-red200' : 'border-gray03'
               } pl-8`}
-              onChangeText={(text: string) => setReciever(text)}
+              value={receiver}
+              onChangeText={(text: string) => handleLetterValue(text)}
               placeholder="수신자 입력"
             />
           </View>
