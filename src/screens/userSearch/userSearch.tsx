@@ -46,7 +46,8 @@ const UserSearchScreen = ({ navigation }: UserSearchScreenProps) => {
           cursor: '2024-11-24T23:59:59',
           offset: 100,
         });
-        setUserList(response);
+        console.log(response);
+        setUserList(response.data.follows);
       };
       fetchData();
     }
@@ -58,13 +59,13 @@ const UserSearchScreen = ({ navigation }: UserSearchScreenProps) => {
         pressFunc1={() => navigation.navigate('FollowScreen')}
         pressFunc2={() => navigation.navigate('UserSearchScreen')}
       />
-      <View className="px-[18px]">
-        <View className="w-[24px] h-full">
-          <Pressable className="h-full" onPress={() => navigation.goBack()}>
+      <View className="px-[18px] flex-1">
+        <View className="w-[24px]">
+          <Pressable onPress={() => navigation.goBack()}>
             <BackArrowSvg />
           </Pressable>
         </View>
-        <View className="flex-row relative">
+        <View className="flex-row relative mt-2">
           <TextInput
             value={keyword}
             onChangeText={(text: string) => setKeyword(text)}
@@ -77,8 +78,9 @@ const UserSearchScreen = ({ navigation }: UserSearchScreenProps) => {
         </View>
         <ScrollView className="py-3 px-[18px]">
           {userList !== undefined &&
+            userList.length !== 0 &&
             userList.map((user) => (
-              <View className="border-b-2 border-gray03">
+              <View key={user.userId} className="border-b-2 border-gray03">
                 <View className="flex-row justify-between items-center p-[22px] font-semibold">
                   <Text>{user.nickName}</Text>
                   <Pressable
