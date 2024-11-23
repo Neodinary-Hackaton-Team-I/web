@@ -1,10 +1,16 @@
+import React from 'react';
 import { PropsWithChildren } from 'react';
 import { ScrollView, Text, TouchableWithoutFeedback } from 'react-native';
 
+interface UserItem {
+  nickName: string;
+  userId: number;
+}
+
 interface ItemProps {
   input: string;
-  value: string;
-  onPress: () => void;
+  userList: UserItem[];
+  onPress: (user: UserItem) => void;
 }
 
 const Container = ({ children }: PropsWithChildren) => {
@@ -15,15 +21,20 @@ const Container = ({ children }: PropsWithChildren) => {
   );
 };
 
-const Item = ({ input, value, onPress }: ItemProps) => {
-  const character = value.split('');
-
+const Item = ({ input = '', userList, onPress }: ItemProps) => {
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <Text className="p-2">
-        {character.map((char, index) => (
-          <Text key={index} className={`${input.includes(char) ? 'text-red300' : 'text-gray03'}`}>
-            {char}
+        {userList.map((char, index) => (
+          <Text
+            key={index}
+            className={`${
+              typeof input === 'string' && input.includes(char.nickName)
+                ? 'text-red300'
+                : 'text-gray03'
+            }`}
+          >
+            {char.nickName}
           </Text>
         ))}
       </Text>
