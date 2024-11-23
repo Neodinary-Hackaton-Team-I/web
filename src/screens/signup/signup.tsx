@@ -6,10 +6,15 @@ import BackGround from '@assets/signup/background.svg';
 
 import LinearGradient from 'react-native-linear-gradient';
 import { SignUpScreenProps } from 'src/shared/stack/stack';
+import { signUp } from '@app/server/login/login';
+import { useRecoilState } from 'recoil';
+import { profileStore } from '@recoil/store';
 
 const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
   const width = Dimensions.get('screen').width;
   const height = Dimensions.get('screen').height;
+
+  const [, setProfile] = useRecoilState(profileStore);
 
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -23,8 +28,18 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
     navigation.goBack();
   };
 
-  const handleSignUp = () => {
-    console.log('회원가입 성공');
+  const handleSignUp = async (): Promise<void> => {
+    const response = await signUp({
+      email: email,
+      password: password,
+      nickname: nickname,
+    });
+
+    setProfile({
+      userId: response.data.userId,
+      nickname: nickname,
+    });
+
     navigation.navigate('SignUpCompleteScreen');
   };
 
