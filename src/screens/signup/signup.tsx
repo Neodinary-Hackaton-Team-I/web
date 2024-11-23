@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, Pressable, Text, TextInput, View } from 'react-native';
 
 import MainIcon from '@assets/login/icon.svg';
@@ -6,7 +6,7 @@ import BackGround from '@assets/signup/background.svg';
 
 import LinearGradient from 'react-native-linear-gradient';
 import { SignUpScreenProps } from 'src/shared/stack/stack';
-import { signUp } from '@app/server/login/login';
+import { signUp } from '@app/server/signup/signup';
 import { useRecoilState } from 'recoil';
 import { profileStore } from '@recoil/store';
 
@@ -28,20 +28,30 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
     navigation.goBack();
   };
 
-  const handleSignUp = async (): Promise<void> => {
-    const response = await signUp({
-      email: email,
-      password: password,
-      nickname: nickname,
-    });
+  const handleSignUp = async () => {
+    try {
+      const response = await signUp({
+        email: email,
+        password: password,
+        nickname: nickname,
+      });
 
-    setProfile({
-      userId: response.data.userId,
-      nickname: nickname,
-    });
+      setProfile({
+        userId: response.data.userId,
+        nickname: nickname,
+      });
 
-    navigation.navigate('SignUpCompleteScreen');
+      navigation.navigate('SignUpCompleteScreen');
+    } catch (error: any) {
+      console.log(error.code);
+    }
   };
+
+  useEffect(() => {
+    console.log(email);
+    console.log(password);
+    console.log(nickname);
+  });
 
   return (
     <LinearGradient
@@ -87,7 +97,7 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
       <View className="px-5 mb-12">
         <Pressable
           onPress={isComplete ? handleSignUp : toBack}
-          className={`rounded-[10px] py-[18.5px] ${isComplete ? 'bg-red100' : 'bg-gray300'}`}
+          className={`rounded-[10px] py-[18.5px] ${isComplete ? 'bg-red100' : 'bg-gray03'}`}
         >
           <Text className="text-center text-white font-semibold">
             {isComplete ? '다음' : '이전'}

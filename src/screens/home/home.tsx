@@ -5,6 +5,7 @@ import DdayBackground from '@assets/home/ddayBackground.svg';
 import LetterComponent from '@widgets/home/letterComponent';
 import WriteButton from '@assets/home/write.svg';
 import { HomeScreenProps } from 'src/shared/stack/stack';
+import Header from '@widgets/Header';
 
 const dummyData = {
   '2024-11-01': [
@@ -66,6 +67,10 @@ const HomeScreen = ({ navigation }: HomeScreenProps) => {
 
   return (
     <SafeAreaView className="bg-white">
+      <Header
+        pressFunc1={() => navigation.navigate('FollowScreen')}
+        pressFunc2={() => navigation.navigate('UserSearchScreen')}
+      />
       <ScrollView bounces={false}>
         <View className="bg-white">
           <View className="w-[1px] h-full absolute bg-black100 left-[65px] z-30" />

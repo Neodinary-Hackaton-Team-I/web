@@ -39,18 +39,22 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
     }
   }, [email]);
 
-  const handleLogin = async (): Promise<void> => {
-    const response = await login({
-      email: email,
-      password: password,
-    });
+  const handleLogin = async () => {
+    try {
+      const response = await login({
+        email: email,
+        password: password,
+      });
 
-    setProfile({
-      userId: response.data.userId,
-      nickname: response.data.nickname,
-    });
+      setProfile({
+        userId: response.data.userId,
+        nickname: response.data.nickname,
+      });
 
-    setIsLoggedIn(true);
+      setIsLoggedIn(true);
+    } catch (error: any) {
+      console.log(error.message);
+    }
   };
 
   return (
@@ -78,7 +82,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
               className="bg-white py-[19px] px-5 rounded-[10px] mb-2"
             />
             {!isEmailRegex && email.trim() !== '' && (
-              <Text className="text-gray300 px-5">올바른 이메일 형식이 아닙니다.</Text>
+              <Text className="text-gray03 px-5">올바른 이메일 형식이 아닙니다.</Text>
             )}
             <TextInput
               value={password}
@@ -94,7 +98,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
               <Text className="text-center text-white font-semibold">로그인</Text>
             </Pressable>
             <Pressable onPress={toSignUp}>
-              <Text className="underline text-gray400 text-sm font-normal text-center">
+              <Text className="underline text-gray04 text-sm font-normal text-center">
                 회원가입
               </Text>
             </Pressable>
