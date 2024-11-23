@@ -9,7 +9,7 @@ interface ItemProps {
 
 const Container = ({ children }: PropsWithChildren) => {
   return (
-    <ScrollView className="border-2 border-gray03 rounded absolute top-20 w-full bg-white z-50 max-h-36">
+    <ScrollView className="border-2 border-gray03 rounded absolute top-14 w-full bg-white z-50 max-h-36">
       {children}
     </ScrollView>
   );
