@@ -25,7 +25,7 @@ module.exports = {
           '@screens': './src/screens',
           '@assets': './src/shared/assets',
           '@axios': './src/shared/axios',
-          '@zustand': './src/shared/zustand',
+          '@recoil': './src/shared/recoil',
         },
       },
     ],
