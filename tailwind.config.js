@@ -12,16 +12,18 @@ module.exports = {
       red200: '#DC3845',
       red300: '#771929',
       black100: '#282525',
-      gray100: '#5D5656',
-      gray200: '#grey02',
       gray01: '#5D5656',
+      gray02: '#918889',
       gray03: '#D7D7D7',
+      gray04: '#BDBDBD',
       white: '#FFFFFF',
     },
-    backgroundColor: {
-      'green-black': 'linear-gradient(180deg, #164F40 0%, #0D222C 100%)',
+    extend: {
+      backgroundImage: {
+        background: 'linear-gradient(180deg, #000000 0%, #381438 100%)',
+        loginBackground: "url('/src/shared/assets/login/background.svg')",
+      },
     },
-    extend: {},
   },
   plugins: [],
 };
