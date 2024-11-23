@@ -12,6 +12,7 @@ import { useRecoilValue } from 'recoil';
 import { isLoggedInStore } from '@recoil/store';
 import { RootStackParamList } from 'src/shared/stack/rootStack';
 import HomeScreen from '@screens/home/home';
+import WriteLetterCompleteScreen from '@screens/WriteLetterCompleteScreen/WriteLetterCompleteScreen';
 
 const rootStack = createNativeStackNavigator<RootStackParamList>();
 const stack = createNativeStackNavigator<StackParamList>();
@@ -25,6 +26,10 @@ function AppInner() {
         <stack.Navigator screenOptions={{ headerShown: false }}>
           <stack.Screen name="HomeScreen" component={HomeScreen} />
           <stack.Screen name="WriteLetterScreen" component={WriteLetterScreen} />
+          <stack.Screen
+            name="WriteLetterCompleteScreen"
+            component={WriteLetterCompleteScreen}
+          ></stack.Screen>
         </stack.Navigator>
       ) : (
         <rootStack.Navigator screenOptions={{ headerShown: false }}>
