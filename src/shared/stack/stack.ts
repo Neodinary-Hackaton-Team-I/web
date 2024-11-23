@@ -19,7 +19,7 @@ export type StackParamList = {
   // 편지 작성 스크린
   WriteLetterScreen: undefined;
   // 편지 작성 완료 스크린
-  WriteLetterCompleteScreen: undefined;
+  WriteLetterCompleteScreen: { receiver: string };
   // 편지 조회 스크린
   ViewLetterScreen: undefined;
 };
