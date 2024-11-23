@@ -1,30 +1,40 @@
-import { useCallback, useState } from 'react';
+import React from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, Text, View } from 'react-native';
 import Follow from '@assets/follow/Follow.svg';
 import SubmitMessage from '@assets/follow/SubmitMessage.svg';
-
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Third Item',
-  },
-];
+import CancelFollow from '@assets/follow/CancelFollow.svg';
+import { useRecoilValue } from 'recoil';
+import { profileStore } from '@recoil/store';
+import Header from '@widgets/Header';
+import { FollowScreenProps } from 'src/shared/stack/stack';
+import BackArrowSvg from '@assets/WriteLetterScreen/backArrow.svg';
+import { follow, getFollowingUser, getFollowUser, unfollow } from '@app/server/social/follow';
 
 type FollowType = 'follow' | 'following';
 
-const FollowScreen = () => {
+interface UserItem {
+  nickname: string;
+  userId: number;
+  followed: boolean;
+}
+
+const FollowScreen = ({ navigation }: FollowScreenProps) => {
+  const profile = useRecoilValue(profileStore);
+  const [cursor] = useState('2024-11-24T23:59:59');
+  const [userList, setUserList] = useState<UserItem[]>([]);
   const [clickMode, setClickMode] = useState<FollowType>('follow');
 
-  const handlePress = (value: FollowType) => {
+  const handlePress = async (value: FollowType): Promise<void> => {
     setClickMode(value);
+  };
+
+  const handleUnFollow = async (id: number) => {
+    await unfollow({ followUserId: id }, profile.userId);
+  };
+
+  const handleFollowing = async (id: number) => {
+    await follow({ followUserId: id }, profile.userId);
   };
 
   const clickBorderColor = useCallback(
@@ -36,8 +46,40 @@ const FollowScreen = () => {
     [clickMode],
   );
 
+  useEffect(() => {
+    const fetchdata = async () => {
+      try {
+        const response =
+          clickMode === 'following'
+            ? await getFollowingUser(profile.userId, {
+                cursor: cursor,
+                offset: 100,
+              })
+            : await getFollowUser(profile.userId, {
+                cursor: cursor,
+                offset: 100,
+              });
+        setUserList(response.data.follows);
+      } catch (error) {
+        throw new Error('Failed to fetch following users:');
+      }
+    };
+
+    fetchdata();
+  }, []);
+
+  console.log(userList);
   return (
     <SafeAreaView>
+      <Header
+        pressFunc1={() => navigation.navigate('FollowScreen')}
+        pressFunc2={() => navigation.navigate('UserSearchScreen')}
+      />
+      <View className="w-[24px] h-full px-[18px]">
+        <Pressable className="h-full" onPress={() => navigation.goBack()}>
+          <BackArrowSvg />
+        </Pressable>
+      </View>
       <View className="flex-row justify-between">
         <Pressable
           className={`${clickBorderColor('follow')} flex-1 items-center p-2.5`}
@@ -53,21 +95,31 @@ const FollowScreen = () => {
         </Pressable>
       </View>
       <FlatList
-        data={DATA}
+        data={userList}
         className="py-3 px-[18px]"
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
+        keyExtractor={(user) => user.userId.toString()}
+        renderItem={(user) => (
           <View className="border-b-2 border-gray03">
             <View className="flex-row justify-between items-center p-[22px] font-semibold">
-              <Text>{item.title}</Text>
-              <View className="flex-row space-x-4">
-                <Pressable>
-                  <SubmitMessage />
+              <Text>{user.nickName}</Text>
+              {clickMode === 'follow' ? (
+                <View className="flex-row space-x-4">
+                  <Pressable onPress={() => navigation.navigate('WriteLetterScreen')}>
+                    <SubmitMessage />
+                  </Pressable>
+                  <Pressable onPress={() => handleUnFollow(user.userId)}>
+                    <CancelFollow />
+                  </Pressable>
+                </View>
+              ) : (
+                <Pressable
+                  onPress={() =>
+                    user.followed ? handleUnFollow(user.userId) : handleFollowing(user.userUd)
+                  }
+                >
+                  {user.followed ? <CancelFollow /> : <Follow />}
                 </Pressable>
-                <Pressable>
-                  <Follow />
-                </Pressable>
-              </View>
+              )}
             </View>
           </View>
         )}

@@ -14,7 +14,7 @@ export const PostAxiosInstance = async <T>(
 
 export const GetAxiosInstance = async <T>(
   url: string,
-  config?: AxiosRequestConfig,
+  config?: AxiosRequestConfig<T>,
 ): Promise<AxiosResponse> => {
   const response = await axiosInstance.get(url, config);
   return response;
@@ -31,9 +31,10 @@ export const PatchAxiosInstance = async <T>(
 
 export const DeleteAxiosInstance = async <T>(
   url: string,
+  data?: any,
   config?: AxiosRequestConfig,
 ): Promise<AxiosResponse> => {
-  const response = await axiosInstance.delete(url, config);
+  const response = await axiosInstance.delete(url, data, config);
   return response;
 };
 
