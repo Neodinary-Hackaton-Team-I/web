@@ -3,6 +3,6 @@ export interface LoggedIn {
 }
 
 export interface Profile {
-  memberId: number;
+  userId: number;
   nickname: string;
 }

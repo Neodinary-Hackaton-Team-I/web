@@ -9,7 +9,7 @@ export const isLoggedInStore = atom<boolean>({
 export const profileStore = atom<Profile>({
   key: 'profile',
   default: {
-    memberId: 0,
+    userId: 0,
     nickname: '',
   },
 });

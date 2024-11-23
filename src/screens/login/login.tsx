@@ -9,6 +9,7 @@ import BackGround from '@assets/login/background.svg';
 import Santa from '@assets/login/santa.svg';
 import { useRecoilState } from 'recoil';
 import { isLoggedInStore, profileStore } from '@recoil/store';
+import { login } from '@app/server/login/login';
 
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const width = Dimensions.get('screen').width;
@@ -24,11 +25,6 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const handleLogin = async (): Promise<void> => {
-    setProfile;
-    setIsLoggedIn(true);
-  };
-
   const toSignUp = () => {
     navigation.navigate('SignUpScreen');
   };
@@ -42,6 +38,20 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       setIsEmailRegex(emailRegex.test(email));
     }
   }, [email]);
+
+  const handleLogin = async (): Promise<void> => {
+    const response = await login({
+      email: email,
+      password: password,
+    });
+
+    setProfile({
+      userId: response.data.userId,
+      nickname: response.data.nickname,
+    });
+
+    setIsLoggedIn(true);
+  };
 
   return (
     <LinearGradient
