@@ -1,10 +1,11 @@
 import React from 'react';
-import { Pressable, SafeAreaView, Text, View } from 'react-native';
+import { Alert, Pressable, SafeAreaView, Text, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { useState } from 'react';
 import CheckedSvg from '@assets/WriteLetterScreen/checkedBox.svg';
 import UnCkeckedSvg from '@assets/WriteLetterScreen/unCheckedBox.svg';
 import BackArrowSvg from '@assets/WriteLetterScreen/backArrow.svg';
+import { useNavigation } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
 
 const WriteLetterScreen = () => {
@@ -13,7 +14,24 @@ const WriteLetterScreen = () => {
   const [letterValue, setLetterValue] = useState<string>('');
   const [imageValue, setImageValue] = useState(undefined);
 
+  const navigation = useNavigation();
+
   const isValid = receiver.length !== 0 && letterValue.length !== 0 && imageValue !== undefined;
+
+  const onSelectImage = () => {
+    launchImageLibrary({ mediaType: 'photo', maxWidth: 108, maxHeight: 108 }, (res) => {
+      if (res.didCancel || !res.assets) return;
+      if (res.errorCode) console.log(res.errorCode);
+
+      const formData = new FormData();
+
+      const image = res.assets[0];
+      const { uri, type, fileName } = image;
+      const file = { uri: uri, type: type, fileName: fileName };
+
+      formData.append('file', file);
+    });
+  };
 
   return (
     <SafeAreaView>
@@ -21,7 +39,7 @@ const WriteLetterScreen = () => {
         <View className="w-full h-[24px] justify-start ">
           {/* SVG 파일 대체 (뒤로 가기)  */}
           <View className="w-[24px] h-full ">
-            <Pressable className="h-full">
+            <Pressable className="h-full" onPress={() => navigation.goBack()}>
               <BackArrowSvg />
             </Pressable>
           </View>
@@ -67,7 +85,10 @@ const WriteLetterScreen = () => {
           {/* 사진 첨부 */}
           <View className="w-full h-[92px] mb-[45px] mt-[28px]">
             <Text className="h-[19px] mb-[12px] ">사진 첨부</Text>
-            <Pressable className="w-full h-[60px] border border-gray03 flex justify-center items-center">
+            <Pressable
+              className="w-full h-[60px] border border-gray03 flex justify-center items-center"
+              onPress={onSelectImage}
+            >
               <Text className="text-gray01">사진 업로드</Text>
             </Pressable>
           </View>
