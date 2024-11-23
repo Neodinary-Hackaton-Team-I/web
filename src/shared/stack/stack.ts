@@ -20,6 +20,8 @@ export type StackParamList = {
   WriteLetterScreen: undefined;
   // 편지 작성 완료 스크린
   WriteLetterCompleteScreen: undefined;
+  // 편지 조회 스크린
+  ViewLetterScreen: undefined;
 };
 
 export type LoginScreenProps = NativeStackScreenProps<StackParamList, 'LoginScreen'>;
@@ -39,3 +41,5 @@ export type WriteLetterCompleteScreenProps = NativeStackScreenProps<
   StackParamList,
   'WriteLetterCompleteScreen'
 >;
+
+export type ViewLetterScreenProps = NativeStackScreenProps<StackParamList, 'ViewLetterScreen'>;
