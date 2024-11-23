@@ -1,10 +1,17 @@
 import React from 'react';
-import { SafeAreaView, View } from 'react-native';
+import { Pressable, SafeAreaView, Text, View } from 'react-native';
 
 const LoginScreen = () => {
   return (
     <SafeAreaView>
-      <View />
+      <View>
+        <Pressable>
+          <Text>로그인</Text>
+        </Pressable>
+        <Pressable>
+          <Text>회원가입</Text>
+        </Pressable>
+      </View>
     </SafeAreaView>
   );
 };
