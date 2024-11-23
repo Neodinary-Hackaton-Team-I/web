@@ -1,6 +1,7 @@
-import { Pressable, SafeAreaView, Text, TextInput, View } from 'react-native';
+import { Pressable, SafeAreaView, TextInput, View } from 'react-native';
 import { useEffect, useState } from 'react';
 import useDebounce from 'src/shared/hooks/useDebounce';
+import ResetButton from '@assets/userSearch/resetButton.svg';
 
 const UserSearchScreen = () => {
   const [keyword, setKeyword] = useState('');
@@ -23,7 +24,7 @@ const UserSearchScreen = () => {
             placeholder="닉네임으로 친구를 찾아보세요"
           />
           <Pressable onPress={() => setKeyword('')} className="absolute right-2 top-3">
-            <Text>초기화</Text>
+            {keyword.length && <ResetButton />}
           </Pressable>
         </View>
       </View>
