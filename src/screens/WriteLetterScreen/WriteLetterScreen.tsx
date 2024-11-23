@@ -1,24 +1,27 @@
 import React from 'react';
-import { Pressable, SafeAreaView, Text, TouchableWithoutFeedback, View } from 'react-native';
+import { Pressable, SafeAreaView, Text, View, Image, TouchableWithoutFeedback } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { useState } from 'react';
 import CheckedSvg from '@assets/WriteLetterScreen/checkedBox.svg';
 import UnCkeckedSvg from '@assets/WriteLetterScreen/unCheckedBox.svg';
 import BackArrowSvg from '@assets/WriteLetterScreen/backArrow.svg';
-import { useNavigation } from '@react-navigation/native';
+import DefaultImageSvg from '@assets/WriteLetterScreen/defaultImage.svg';
 import { launchImageLibrary } from 'react-native-image-picker';
+import { WriteLetterScreenProps } from 'src/shared/stack/stack';
+import Header from '@widgets/Header';
+import useDebounce from 'src/shared/hooks/useDebounce';
 import Modal from '@widgets/modal';
 
-const WriteLetterScreen = () => {
+const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
   const [isCheckedBox, setIsCheckedBox] = useState<boolean>(false);
   const [receiver, setReciever] = useState<string>('');
   const [letterValue, setLetterValue] = useState<string>('');
   const [imageValue, setImageValue] = useState(undefined);
+  const [imageUri, setImageUri] = useState<string>();
   const [isOverlay, setIsOverlay] = useState(false);
-
-  const navigation = useNavigation();
-
-  const isValid = receiver.length !== 0 && letterValue.length !== 0 && imageValue !== undefined;
+  // 검색 api 이용할 때,
+  const debouncedValue = useDebounce(receiver, 400);
+  const isValid = receiver.length !== 0 && letterValue.length !== 0 && imageUri !== undefined;
 
   const onSelectImage = () => {
     launchImageLibrary({ mediaType: 'photo', maxWidth: 108, maxHeight: 108 }, (res) => {
@@ -34,9 +37,18 @@ const WriteLetterScreen = () => {
       const image = res.assets[0];
       const { uri, type, fileName } = image;
       const file = { uri: uri, type: type, fileName: fileName };
-
+      setImageUri(uri);
       formData.append('file', file);
     });
+  };
+
+  const handleSubmit = () => {
+    // receiver , letterValue,imageValue (FormData) 전송
+    navigation.navigate('WriteLetterCompleteScreen', { receiver: receiver });
+  };
+
+  const handleLetterValue = (text: string) => {
+    setReciever(text);
   };
 
   const handleTouch = () => {
@@ -45,6 +57,10 @@ const WriteLetterScreen = () => {
 
   return (
     <SafeAreaView>
+      <Header
+        pressFunc1={() => navigation.navigate('FollowScreen')}
+        pressFunc2={() => navigation.navigate('UserSearchScreen')}
+      />
       <TouchableWithoutFeedback onPress={handleTouch}>
         <View className=" h-full px-[18px] flex  align-center">
           <View className="w-full h-[24px] justify-start ">
@@ -56,21 +72,28 @@ const WriteLetterScreen = () => {
             </View>
             {/* 나에게 작성하기 */}
             <View className="w-full h-[24px] flex flex-row mt-[28px] mb-[10px] items-center">
-              <Pressable className="w-[24px]" onPress={() => setIsCheckedBox((prev) => !prev)}>
+              <Pressable
+                className="w-[24px]"
+                onPress={() => {
+                  const nextCheckedState = !isCheckedBox; // 현재 상태를 반전
+                  setIsCheckedBox(nextCheckedState); // 상태 업데이트
+                  setReciever(nextCheckedState ? '나에게' : ''); // 반전된 상태에 따라 수신자 업데이트
+                }}
+              >
                 {isCheckedBox ? <CheckedSvg /> : <UnCkeckedSvg />}
               </Pressable>
               <Text className="text-gray01">나에게 작성하기</Text>
             </View>
             {/* 수신자 */}
-            <View className="relative w-full h-[56px] mb-10 relative">
-              <Text className="absolute left-0 bottom-[18px]">To .</Text>
+            <View className="relative w-full h-[56px]">
+              <Text className="absolute left-0 bottom-[20px]">To .</Text>
               <TextInput
                 className={`w-full h-14 border-b ${
                   receiver.length === 0 ? 'border-red200' : 'border-gray03'
                 } pl-8`}
                 value={receiver}
-                onChangeText={(text: string) => setReciever(text)}
                 onTouchStart={() => setIsOverlay(true)}
+                onChangeText={(text: string) => handleLetterValue(text)}
                 placeholder="수신자 입력"
               />
               {isOverlay && (
@@ -85,9 +108,6 @@ const WriteLetterScreen = () => {
                   />
                 </Modal.Container>
               )}
-              {/* <Pressable className="absolute w-[34px] h-[34px] rounded-full bg-[#DC3845] right-0 bottom-2 flex items-center justify-center">
-              <Text className="text-white text-base">{'>'}</Text>
-            </Pressable> */}
             </View>
             {/* 편지 작성 */}
             <View className="w-full h-[244px] mt-[38px] flex">
@@ -101,27 +121,43 @@ const WriteLetterScreen = () => {
                 multiline
                 placeholder="편지 내용을 입력하세요"
                 onChangeText={(text: string) => setLetterValue(text)}
+                maxLength={500}
               />
               <View className="flex items-end">
-                <Text className="text-[12px] text-gray01 right-0">{'zz'} / 500</Text>
+                <Text className="text-[12px] text-gray01 right-0">{letterValue.length} / 500</Text>
               </View>
-            </View>
 
-            {/* 사진 첨부 */}
-            <View className="w-full h-[92px] mb-[45px] mt-[28px]">
-              <Text className="h-[19px] mb-[12px] ">사진 첨부</Text>
+              {/* 사진 첨부 */}
+              <View className="w-full h-[92px]  mt-[28px]">
+                <Text className="h-[19px] mb-[12px] ">사진 첨부</Text>
+                <View className="w-full h-[144px] mb-[28px] border border-gray03 flex-row justify-around items-center">
+                  <View className="w-[100px] h-[112px] border border-gray03 flex items-center justify-center">
+                    {imageUri ? (
+                      <Image source={{ uri: imageUri }} width={100} height={112} />
+                    ) : (
+                      <DefaultImageSvg />
+                    )}
+                  </View>
+                  <Pressable
+                    className="w-[160px] h-[36px] border border-gray03 flex justify-center items-center"
+                    onPress={onSelectImage}
+                  >
+                    <Text className="text-gray01">사진 업로드</Text>
+                  </Pressable>
+                </View>
+              </View>
+
+              {/* 완료하기 버튼 */}
               <Pressable
-                className="w-full h-[60px] border border-gray03 flex justify-center items-center"
-                onPress={onSelectImage}
+                className={`w-full mt-[100px] h-[56px] ${
+                  isValid ? 'bg-red200' : 'bg-[#D7D7D7]'
+                } flex items-center justify-center rounded-[10px]`}
+                disabled={!isValid}
+                onPress={handleSubmit}
               >
-                <Text className="text-gray01">사진 업로드</Text>
+                <Text className="text-white">완료하기</Text>
               </Pressable>
             </View>
-
-            {/* 완료하기 버튼 */}
-            <Pressable className="w-full h-[56px] border border-gray03 bg-[#D7D7D7] flex items-center justify-center rounded-[10px]">
-              <Text className="text-white">완료하기</Text>
-            </Pressable>
           </View>
         </View>
       </TouchableWithoutFeedback>
