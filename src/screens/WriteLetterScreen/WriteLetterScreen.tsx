@@ -115,7 +115,7 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
   }, []);
 
   return (
-    <SafeAreaView>
+    <SafeAreaView className="flex-1 bg-white">
       <Header
         pressFunc1={() => navigation.navigate('FollowScreen')}
         pressFunc2={() => navigation.navigate('UserSearchScreen')}
@@ -136,6 +136,7 @@ const WriteLetterScreen = ({ navigation }: WriteLetterScreenProps) => {
                 onPress={() => {
                   const nextCheckedState = !isCheckedBox; // 현재 상태를 반전
                   setIsCheckedBox(nextCheckedState); // 상태 업데이트
+                  setRecieverId(profile.userId);
                   setRecieverNickname(nextCheckedState ? '나에게' : ''); // 반전된 상태에 따라 수신자 업데이트
                 }}
               >

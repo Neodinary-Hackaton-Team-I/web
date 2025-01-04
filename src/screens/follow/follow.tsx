@@ -1,7 +1,7 @@
 import React from 'react';
 import { useCallback, useEffect, useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, Text, View } from 'react-native';
-import Follow from '@assets/follow/Follow.svg';
+import PlusButton from '@assets/follow/plusButton.svg';
 import SubmitMessage from '@assets/follow/SubmitMessage.svg';
 import CancelFollow from '@assets/follow/CancelFollow.svg';
 import { useRecoilValue } from 'recoil';
@@ -117,7 +117,7 @@ const FollowScreen = ({ navigation }: FollowScreenProps) => {
                     user.followed ? handleUnFollow(user.userId) : handleFollowing(user.userUd)
                   }
                 >
-                  {user.followed ? <CancelFollow /> : <Follow />}
+                  {user.followed ? <CancelFollow /> : <PlusButton />}
                 </Pressable>
               )}
             </View>
