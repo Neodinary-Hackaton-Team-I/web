@@ -10,7 +10,7 @@ import { useRecoilValue } from 'recoil';
 import { follow, getSearchUser, unfollow } from '@app/server/social/follow';
 import { profileStore } from '@recoil/store';
 import CancelFollow from '@assets/follow/CancelFollow.svg';
-import Follow from '@assets/follow/follow.svg';
+import PlusButton from '@assets/follow/plusButton.svg';
 
 interface UserItem {
   nickName: string;
@@ -88,7 +88,7 @@ const UserSearchScreen = ({ navigation }: UserSearchScreenProps) => {
                       user.followed ? handleUnFollow(user.userId) : handleFollowing(user.userId)
                     }
                   >
-                    {user.followed ? <CancelFollow /> : <Follow />}
+                    {user.followed ? <CancelFollow /> : <PlusButton />}
                   </Pressable>
                 </View>
               </View>
